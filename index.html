@@ -212,51 +212,26 @@
             object-fit: contain;
         }
 
-        .arrow-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            border: none;
-            font-size: 1.2rem;
-            padding: 10px 12px;
-            cursor: pointer;
-            border-radius: 50%;
-            user-select: none;
-            z-index: 10;
-        }
-
-        .arrow-left { left: 8px; }
-        .arrow-right { right: 8px; }
-
-        .color-label {
-            font-size: 0.85rem;
-            color: var(--gray);
-            margin-bottom: 0.8rem;
-            font-weight: 500;
-        }
-
-        /* Size Selector Styling */
-        .size-section {
+        /* Color & Size Selector Styling */
+        .selection-section {
             margin: 0.8rem 0;
             text-align: left;
         }
 
-        .size-title {
+        .section-title {
             font-size: 0.85rem;
             font-weight: 600;
             color: var(--dark);
             margin-bottom: 6px;
         }
 
-        .size-options {
+        .options-row {
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
         }
 
-        .size-btn {
+        .option-btn {
             border: 1px solid #cbd5e1;
             background: white;
             color: var(--dark);
@@ -268,10 +243,25 @@
             transition: all 0.2s;
         }
 
-        .size-btn.selected {
+        .option-btn.selected {
             background: var(--accent);
             color: white;
             border-color: var(--accent);
+        }
+
+        /* Color Box Specific Styling */
+        .color-box-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+        }
+
+        .color-indicator {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 1px solid #cbd5e1;
         }
 
         .product-info {
@@ -373,18 +363,22 @@
             <h3 id="modalTitle" style="font-size: 1.1rem; margin-bottom: 5px;">Product Title</h3>
             
             <div class="viewer-container">
-                <button class="arrow-btn arrow-left" onclick="changeColor(-1)">&#10094;</button>
                 <img id="modalImg" class="viewer-img" src="" alt="Product Image">
-                <button class="arrow-btn arrow-right" onclick="changeColor(1)">&#10095;</button>
             </div>
-            
-            <div class="color-label" id="colorName">Color: Black</div>
 
             <!-- Size Selection -->
-            <div class="size-section">
-                <div class="size-title">Select Size:</div>
-                <div class="size-options" id="sizeContainer">
+            <div class="selection-section">
+                <div class="section-title">Select Size:</div>
+                <div class="options-row" id="sizeContainer">
                     <!-- Dynamic sizes load here -->
+                </div>
+            </div>
+
+            <!-- Color Selection (Boxes) -->
+            <div class="selection-section" id="colorSection">
+                <div class="section-title">Select Color:</div>
+                <div class="options-row" id="colorContainer">
+                    <!-- Dynamic color boxes load here -->
                 </div>
             </div>
 
@@ -424,33 +418,236 @@
         const products = [
             {
                 id: 1,
-                name: "Custom T-Shirt",
-                price: 150,
+                name: "Breakthrough + Cross Logo",
+                price: 300,
                 sizes: ["S", "M", "L", "XL", "XXL"],
                 variants: [
-                    { color: "Black", front: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500", back: "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=500" },
-                    { color: "Red", front: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=500", back: "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=500" },
-                    { color: "White", front: "https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=500", back: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500" }
+                    { 
+                        color: "White", 
+                        bgHex: "#ffffff",
+                        front: "https://i.imgur.com/qPf19oC.jpeg", 
+                        back: "https://i.imgur.com/1fp0KOG.jpeg" 
+                    },
+                    { 
+                        color: "Black", 
+                        bgHex: "#000000",
+                        front: "https://i.imgur.com/x7PFYT6.jpeg", 
+                        back: "https://i.imgur.com/MicTnYJ.jpeg" 
+                    },
+                    { 
+                        color: "Navy Blue", 
+                        bgHex: "#1e3a8a",
+                        front: "https://i.imgur.com/2wCQQyS.jpeg", 
+                        back: "https://i.imgur.com/m02rVJa.jpeg" 
+                    }
                 ]
             },
             {
                 id: 2,
-                name: "Branded Cap",
-                price: 80,
-                sizes: ["Standard", "Adjustable"],
+                name: "Golf T-Shirt",
+                price: 300,
+                sizes: ["S", "M", "L", "XL", "XXL"],
                 variants: [
-                    { color: "Black", front: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=500", back: "https://images.unsplash.com/photo-1575428652377-a2d80e2277fc?w=500" },
-                    { color: "Blue", front: "https://images.unsplash.com/photo-1534215754734-18e55d13e346?w=500", back: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=500" }
+                    { 
+                        color: "White", 
+                        bgHex: "#ffffff",
+                        front: "https://i.imgur.com/Mw0v5ng.jpeg", 
+                        back: "https://i.imgur.com/1fp0KOG.jpeg" 
+                    },
+                    { 
+                        color: "Black", 
+                        bgHex: "#000000",
+                        front: "https://i.imgur.com/dj7jKWW.jpeg", 
+                        back: "https://i.imgur.com/MicTnYJ.jpeg" 
+                    },
+                    { 
+                        color: "Navy Blue", 
+                        bgHex: "#1e3a8a",
+                        front: "https://i.imgur.com/x5ACi6X.jpeg", 
+                        back: "https://i.imgur.com/m02rVJa.jpeg" 
+                    }
                 ]
             },
             {
                 id: 3,
-                name: "Metallic Pin Badge",
-                price: 30,
-                sizes: ["Small (34mm)", "Medium (44mm)", "Large (58mm)"],
+                name: "Breakthrough Logo Cargo Smart Shirt",
+                price: 370,
+                sizes: ["S", "M", "L", "XL", "XXL"],
                 variants: [
-                    { color: "Gold", front: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=500", back: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500" },
-                    { color: "Silver", front: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500", back: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=500" }
+                    { 
+                        color: "White", 
+                        bgHex: "#ffffff",
+                        front: "https://i.imgur.com/egmNjeo.jpeg", 
+                        back: "https://i.imgur.com/Rm2EPAx.jpeg" 
+                    },
+                    { 
+                        color: "Black", 
+                        bgHex: "#000000",
+                        front: "https://i.imgur.com/QUZExjD.jpeg", 
+                        back: "https://i.imgur.com/mBF9KyM.jpeg" 
+                    },
+                    { 
+                        color: "Navy Blue", 
+                        bgHex: "#1e3a8a",
+                        front: "https://i.imgur.com/brfQtJJ.jpeg", 
+                        back: "https://i.imgur.com/eyafB8R.jpeg" 
+                    }
+                ]
+            },
+            {
+                id: 4,
+                name: "Cross Logo Cargo Smart Shirt",
+                price: 370,
+                sizes: ["S", "M", "L", "XL", "XXL"],
+                variants: [
+                    { 
+                        color: "White", 
+                        bgHex: "#ffffff",
+                        front: "https://i.imgur.com/4hUCtIy.jpeg", 
+                        back: "https://i.imgur.com/Rm2EPAx.jpeg" 
+                    },
+                    { 
+                        color: "Black", 
+                        bgHex: "#000000",
+                        front: "https://i.imgur.com/lfmIVJm.jpeg", 
+                        back: "https://i.imgur.com/mBF9KyM.jpeg" 
+                    },
+                    { 
+                        color: "Blue", 
+                        bgHex: "#2563eb",
+                        front: "https://i.imgur.com/oLFARBL.jpeg", 
+                        back: "https://i.imgur.com/eyafB8R.jpeg" 
+                    }
+                ]
+            },
+            {
+                id: 5,
+                name: "Cotton T-Shirt",
+                price: 260,
+                sizes: ["S", "M", "L", "XL", "XXL"],
+                variants: [
+                    { 
+                        color: "White", 
+                        bgHex: "#ffffff",
+                        front: "https://i.imgur.com/npc5GF0.jpeg", 
+                        back: "https://i.imgur.com/vIcAaUf.jpeg" 
+                    },
+                    { 
+                        color: "Black", 
+                        bgHex: "#000000",
+                        front: "https://i.imgur.com/nPTw873.jpeg", 
+                        back: "https://i.imgur.com/TeaVTrq.jpeg" 
+                    },
+                    { 
+                        color: "Navy Blue", 
+                        bgHex: "#1e3a8a",
+                        front: "https://i.imgur.com/If8xRyK.jpeg", 
+                        back: "https://i.imgur.com/0Z387bx.jpeg" 
+                    }
+                ]
+            },
+            {
+                id: 6,
+                name: "Polyester T-Shirt",
+                price: 190,
+                sizes: ["S", "M", "L", "XL", "XXL"],
+                variants: [
+                    { 
+                        color: "White", 
+                        bgHex: "#ffffff",
+                        front: "https://i.imgur.com/Oz6aEwU.jpeg", 
+                        back: "https://i.imgur.com/LotFDge.jpeg" 
+                    },
+                    { 
+                        color: "Black", 
+                        bgHex: "#000000",
+                        front: "https://i.imgur.com/eCv75wX.jpeg", 
+                        back: "https://i.imgur.com/yJqNarF.jpeg" 
+                    },
+                    { 
+                        color: "Navy Blue", 
+                        bgHex: "#1e3a8a",
+                        front: "https://i.imgur.com/IUcD9zu.jpeg", 
+                        back: "https://i.imgur.com/iF4izGP.jpeg" 
+                    }
+                ]
+            },
+            {
+                id: 7,
+                name: "Breakthrough Logo Branded Cap",
+                price: 100,
+                sizes: ["Standard", "Adjustable"],
+                variants: [
+                    { 
+                        color: "White", 
+                        bgHex: "#ffffff",
+                        front: "https://i.imgur.com/G3LUIY0.jpeg", 
+                        back: "https://i.imgur.com/G3LUIY0.jpeg" 
+                    },
+                    { 
+                        color: "Black", 
+                        bgHex: "#000000",
+                        front: "https://i.imgur.com/6G0DBiH.jpeg", 
+                        back: "https://i.imgur.com/6G0DBiH.jpeg" 
+                    },
+                    { 
+                        color: "Navy Blue", 
+                        bgHex: "#1e3a8a",
+                        front: "https://i.imgur.com/SguDiKv.jpeg", 
+                        back: "https://i.imgur.com/SguDiKv.jpeg" 
+                    }
+                ]
+            },
+            {
+                id: 8,
+                name: "Branded Cap",
+                price: 100,
+                sizes: ["Standard", "Adjustable"],
+                variants: [
+                    { 
+                        color: "White", 
+                        bgHex: "#ffffff",
+                        front: "https://i.imgur.com/i7WVNOL.jpeg", 
+                        back: "https://i.imgur.com/MeNHrIW.jpeg" 
+                    },
+                    { 
+                        color: "Black", 
+                        bgHex: "#000000",
+                        front: "https://i.imgur.com/4tnZlt3.jpeg", 
+                        back: "https://i.imgur.com/XRIeByX.jpeg" 
+                    },
+                    { 
+                        color: "Navy Blue", 
+                        bgHex: "#1e3a8a",
+                        front: "https://i.imgur.com/uFjwPJo.jpeg", 
+                        back: "https://i.imgur.com/AJ9JA98.jpeg" 
+                    }
+                ]
+            },
+            {
+                id: 9,
+                name: "Branded Cap (Breakthrough + GMMI Logo)",
+                price: 100,
+                sizes: ["Standard", "Adjustable"],
+                variants: [
+                    { 
+                        color: "White", 
+                        bgHex: "#ffffff",
+                        front: "https://i.imgur.com/PIEO1mR.jpeg", 
+                        back: "https://i.imgur.com/PIEO1mR.jpeg" 
+                    },
+                    { 
+                        color: "Black", 
+                        bgHex: "#000000",
+                        front: "https://i.imgur.com/iOFYcnJ.jpeg", 
+                        back: "https://i.imgur.com/iOFYcnJ.jpeg" 
+                    },
+                    { 
+                        color: "Navy Blue", 
+                        bgHex: "#1e3a8a",
+                        front: "https://i.imgur.com/WyH8GPL.jpeg", 
+                        back: "https://i.imgur.com/WyH8GPL.jpeg" 
+                    }
                 ]
             }
         ];
@@ -490,12 +687,36 @@
             document.getElementById('productModal').style.display = 'flex';
         }
 
-        // Render Size Buttons
+        // Render Color Boxes & Sizes
+        function renderColors() {
+            const container = document.getElementById('colorContainer');
+            const section = document.getElementById('colorSection');
+            
+            if (currentProduct.variants.length <= 1) {
+                section.style.display = 'none';
+                return;
+            }
+            section.style.display = 'block';
+
+            container.innerHTML = currentProduct.variants.map((variant, index) => `
+                <button class="option-btn color-box-btn ${index === currentColorIndex ? 'selected' : ''}" onclick="selectColor(${index})">
+                    <span class="color-indicator" style="background-color: ${variant.bgHex};"></span>
+                    ${variant.color}
+                </button>
+            `).join('');
+        }
+
         function renderSizes() {
             const container = document.getElementById('sizeContainer');
             container.innerHTML = currentProduct.sizes.map(size => `
-                <button class="size-btn ${size === selectedSize ? 'selected' : ''}" onclick="selectSize('${size}')">${size}</button>
+                <button class="option-btn ${size === selectedSize ? 'selected' : ''}" onclick="selectSize('${size}')">${size}</button>
             `).join('');
+        }
+
+        function selectColor(index) {
+            currentColorIndex = index;
+            isFrontView = true; // reset to front view on color change
+            updateModalUI();
         }
 
         function selectSize(size) {
@@ -508,22 +729,13 @@
             const variant = currentProduct.variants[currentColorIndex];
             document.getElementById('modalTitle').innerText = currentProduct.name;
             document.getElementById('modalPrice').innerText = `K${currentProduct.price}`;
-            document.getElementById('colorName').innerText = `Color: ${variant.color} (${currentColorIndex + 1}/${currentProduct.variants.length})`;
             
             const imgSrc = isFrontView ? variant.front : variant.back;
             document.getElementById('modalImg').src = imgSrc;
             
             document.getElementById('flipBtn').innerText = isFrontView ? "Flip to Back" : "Flip to Front";
             renderSizes();
-        }
-
-        // Change Color Variant
-        function changeColor(direction) {
-            currentColorIndex += direction;
-            if (currentColorIndex < 0) currentColorIndex = currentProduct.variants.length - 1;
-            if (currentColorIndex >= currentProduct.variants.length) currentColorIndex = 0;
-            isFrontView = true;
-            updateModalUI();
+            renderColors();
         }
 
         // Toggle Front/Back View
