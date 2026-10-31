@@ -124,15 +124,25 @@
             transform: scale(0.98);
         }
 
-        .card-img {
+        .card-img-wrapper {
             width: 100%;
             height: 180px;
-            object-fit: cover;
             background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 10px;
         }
 
         @media (min-width: 768px) {
-            .card-img { height: 240px; }
+            .card-img-wrapper { height: 240px; }
+        }
+
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .card-body {
@@ -181,6 +191,8 @@
             text-align: center;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             animation: slideUp 0.2s ease-out;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         @keyframes slideUp {
@@ -268,8 +280,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 0.8rem 0;
-            font-size: 1.2rem;
+            margin: 0.6rem 0;
+            font-size: 1.1rem;
             font-weight: bold;
         }
 
@@ -306,7 +318,7 @@
             background: var(--primary);
             color: white;
             width: 100%;
-            margin-top: 1rem;
+            margin-top: 0.8rem;
             font-size: 1rem;
             display: flex;
             align-items: center;
@@ -320,9 +332,9 @@
 
         /* Cart view items */
         .cart-items {
-            max-height: 250px;
+            max-height: 160px;
             overflow-y: auto;
-            margin: 0.5rem 0;
+            margin: 0.4rem 0;
             text-align: left;
             padding-right: 4px;
         }
@@ -331,9 +343,81 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
+            padding: 6px 0;
             border-bottom: 1px solid #f1f5f9;
             font-size: 0.9rem;
+        }
+
+        /* Checkout Form Fields */
+        .checkout-form {
+            text-align: left;
+            margin: 8px 0;
+        }
+
+        .form-group {
+            margin-bottom: 6px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--gray);
+            margin-bottom: 2px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 7px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent);
+        }
+
+        /* Delivery Checkbox Section */
+        .delivery-option-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 10px;
+            margin: 8px 0;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .delivery-option-box input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        /* Payment Notice Banner */
+        .payment-banner {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 8px 10px;
+            margin: 8px 0;
+            font-size: 0.8rem;
+            color: #1e40af;
+            text-align: left;
+        }
+
+        .payment-banner strong {
+            display: block;
+            margin-bottom: 2px;
+            color: #1e3a8a;
         }
     </style>
 </head>
@@ -387,7 +471,7 @@
                 <span id="modalPrice" style="color: var(--accent);">K0</span>
             </div>
 
-            <div class="action-btns">
+            <div class="action-btns" id="actionBtnsContainer">
                 <button class="btn btn-flip" id="flipBtn" onclick="toggleView()">Flip to Back</button>
                 <button class="btn btn-cart" onclick="addToCart()">Add to Cart</button>
             </div>
@@ -401,12 +485,43 @@
             <h3 style="font-size: 1.15rem;">Your Shopping Cart</h3>
             
             <div class="cart-items" id="cartItems">
-                <p style="text-align:center; color: var(--gray); padding: 20px 0;">Your cart is empty.</p>
+                <p style="text-align:center; color: var(--gray); padding: 15px 0;">Your cart is empty.</p>
             </div>
 
-            <div class="product-info" style="border-top: 1px solid #f1f5f9; padding-top: 10px; margin-top: 5px;">
-                <span style="font-size: 1rem;">Total:</span>
+            <!-- Customer Details Form -->
+            <div class="checkout-form">
+                <div class="form-group">
+                    <label for="customerName">Your Full Name:</label>
+                    <input type="text" id="customerName" class="form-control" placeholder="e.g. John Mwape">
+                </div>
+                <div class="form-group">
+                    <label for="customerPhone">Phone Number:</label>
+                    <input type="tel" id="customerPhone" class="form-control" placeholder="e.g. 097XXXXXXXX">
+                </div>
+                <div class="form-group">
+                    <label for="deliveryAddress">Delivery Address / Location:</label>
+                    <input type="text" id="deliveryAddress" class="form-control" placeholder="e.g. Kaunda Square Stage 2">
+                </div>
+            </div>
+
+            <!-- Delivery Checkbox Option -->
+            <label class="delivery-option-box">
+                <input type="checkbox" id="deliveryCheckbox" onchange="updateCartTotals()">
+                <div>
+                    <b>Request Delivery (+K50)</b><br>
+                    <span style="color: var(--gray); font-size: 0.78rem;">Unchecked = Free pickup at events centre</span>
+                </div>
+            </label>
+
+            <div class="product-info" style="border-top: 1px solid #f1f5f9; padding-top: 8px; margin-top: 5px;">
+                <span style="font-size: 0.95rem;">Total:</span>
                 <span id="cartTotal" style="color: var(--accent);">K0</span>
+            </div>
+
+            <!-- Payment Instructions Box -->
+            <div class="payment-banner">
+                <strong>💳 Mobile Money Payment Details:</strong>
+                Send payment to: <b>0977628200</b> (Name: <b>Sandra Kabwe</b>)
             </div>
 
             <button class="btn btn-whatsapp" onclick="checkoutToWhatsApp()">Place Order via WhatsApp</button>
@@ -417,42 +532,16 @@
         // Store Catalog Data
         const products = [
             {
-                id: 1,
-                name: "Breakthrough + Cross Logo",
-                price: 300,
-                sizes: ["S", "M", "L", "XL", "XXL"],
-                variants: [
-                    { 
-                        color: "White", 
-                        bgHex: "#ffffff",
-                        front: "https://i.imgur.com/qPf19oC.jpeg", 
-                        back: "https://i.imgur.com/1fp0KOG.jpeg" 
-                    },
-                    { 
-                        color: "Black", 
-                        bgHex: "#000000",
-                        front: "https://i.imgur.com/x7PFYT6.jpeg", 
-                        back: "https://i.imgur.com/MicTnYJ.jpeg" 
-                    },
-                    { 
-                        color: "Navy Blue", 
-                        bgHex: "#1e3a8a",
-                        front: "https://i.imgur.com/2wCQQyS.jpeg", 
-                        back: "https://i.imgur.com/m02rVJa.jpeg" 
-                    }
-                ]
-            },
-            {
-                id: 2,
+                id: 8,
                 name: "Golf T-Shirt",
                 price: 300,
                 sizes: ["S", "M", "L", "XL", "XXL"],
                 variants: [
                     { 
-                        color: "White", 
-                        bgHex: "#ffffff",
-                        front: "https://i.imgur.com/Mw0v5ng.jpeg", 
-                        back: "https://i.imgur.com/1fp0KOG.jpeg" 
+                        color: "Navy Blue", 
+                        bgHex: "#1e3a8a",
+                        front: "https://i.imgur.com/x5ACi6X.jpeg", 
+                        back: "https://i.imgur.com/m02rVJa.jpeg" 
                     },
                     { 
                         color: "Black", 
@@ -461,145 +550,29 @@
                         back: "https://i.imgur.com/MicTnYJ.jpeg" 
                     },
                     { 
-                        color: "Navy Blue", 
-                        bgHex: "#1e3a8a",
-                        front: "https://i.imgur.com/x5ACi6X.jpeg", 
-                        back: "https://i.imgur.com/m02rVJa.jpeg" 
-                    }
-                ]
-            },
-            {
-                id: 3,
-                name: "Breakthrough Logo Cargo Smart Shirt",
-                price: 370,
-                sizes: ["S", "M", "L", "XL", "XXL"],
-                variants: [
-                    { 
                         color: "White", 
                         bgHex: "#ffffff",
-                        front: "https://i.imgur.com/egmNjeo.jpeg", 
-                        back: "https://i.imgur.com/Rm2EPAx.jpeg" 
-                    },
-                    { 
-                        color: "Black", 
-                        bgHex: "#000000",
-                        front: "https://i.imgur.com/QUZExjD.jpeg", 
-                        back: "https://i.imgur.com/mBF9KyM.jpeg" 
-                    },
-                    { 
-                        color: "Navy Blue", 
-                        bgHex: "#1e3a8a",
-                        front: "https://i.imgur.com/brfQtJJ.jpeg", 
-                        back: "https://i.imgur.com/eyafB8R.jpeg" 
+                        front: "https://i.imgur.com/Mw0v5ng.jpeg", 
+                        back: "https://i.imgur.com/1fp0KOG.jpeg" 
                     }
                 ]
             },
             {
-                id: 4,
-                name: "Cross Logo Cargo Smart Shirt",
-                price: 370,
-                sizes: ["S", "M", "L", "XL", "XXL"],
+                id: 1,
+                name: "Branded Badge",
+                price: 200,
+                sizes: ["Standard"],
                 variants: [
                     { 
-                        color: "White", 
+                        color: "Default", 
                         bgHex: "#ffffff",
-                        front: "https://i.imgur.com/4hUCtIy.jpeg", 
-                        back: "https://i.imgur.com/Rm2EPAx.jpeg" 
-                    },
-                    { 
-                        color: "Black", 
-                        bgHex: "#000000",
-                        front: "https://i.imgur.com/lfmIVJm.jpeg", 
-                        back: "https://i.imgur.com/mBF9KyM.jpeg" 
-                    },
-                    { 
-                        color: "Blue", 
-                        bgHex: "#2563eb",
-                        front: "https://i.imgur.com/oLFARBL.jpeg", 
-                        back: "https://i.imgur.com/eyafB8R.jpeg" 
+                        front: "https://i.imgur.com/UONkJVL.png", 
+                        back: "https://i.imgur.com/UONkJVL.png" 
                     }
                 ]
             },
             {
-                id: 5,
-                name: "Cotton T-Shirt",
-                price: 260,
-                sizes: ["S", "M", "L", "XL", "XXL"],
-                variants: [
-                    { 
-                        color: "White", 
-                        bgHex: "#ffffff",
-                        front: "https://i.imgur.com/npc5GF0.jpeg", 
-                        back: "https://i.imgur.com/vIcAaUf.jpeg" 
-                    },
-                    { 
-                        color: "Black", 
-                        bgHex: "#000000",
-                        front: "https://i.imgur.com/nPTw873.jpeg", 
-                        back: "https://i.imgur.com/TeaVTrq.jpeg" 
-                    },
-                    { 
-                        color: "Navy Blue", 
-                        bgHex: "#1e3a8a",
-                        front: "https://i.imgur.com/If8xRyK.jpeg", 
-                        back: "https://i.imgur.com/0Z387bx.jpeg" 
-                    }
-                ]
-            },
-            {
-                id: 6,
-                name: "Polyester T-Shirt",
-                price: 190,
-                sizes: ["S", "M", "L", "XL", "XXL"],
-                variants: [
-                    { 
-                        color: "White", 
-                        bgHex: "#ffffff",
-                        front: "https://i.imgur.com/Oz6aEwU.jpeg", 
-                        back: "https://i.imgur.com/LotFDge.jpeg" 
-                    },
-                    { 
-                        color: "Black", 
-                        bgHex: "#000000",
-                        front: "https://i.imgur.com/eCv75wX.jpeg", 
-                        back: "https://i.imgur.com/yJqNarF.jpeg" 
-                    },
-                    { 
-                        color: "Navy Blue", 
-                        bgHex: "#1e3a8a",
-                        front: "https://i.imgur.com/IUcD9zu.jpeg", 
-                        back: "https://i.imgur.com/iF4izGP.jpeg" 
-                    }
-                ]
-            },
-            {
-                id: 7,
-                name: "Breakthrough Logo Branded Cap",
-                price: 100,
-                sizes: ["Standard", "Adjustable"],
-                variants: [
-                    { 
-                        color: "White", 
-                        bgHex: "#ffffff",
-                        front: "https://i.imgur.com/G3LUIY0.jpeg", 
-                        back: "https://i.imgur.com/G3LUIY0.jpeg" 
-                    },
-                    { 
-                        color: "Black", 
-                        bgHex: "#000000",
-                        front: "https://i.imgur.com/6G0DBiH.jpeg", 
-                        back: "https://i.imgur.com/6G0DBiH.jpeg" 
-                    },
-                    { 
-                        color: "Navy Blue", 
-                        bgHex: "#1e3a8a",
-                        front: "https://i.imgur.com/SguDiKv.jpeg", 
-                        back: "https://i.imgur.com/SguDiKv.jpeg" 
-                    }
-                ]
-            },
-            {
-                id: 8,
+                id: 14,
                 name: "Branded Cap",
                 price: 100,
                 sizes: ["Standard", "Adjustable"],
@@ -625,11 +598,111 @@
                 ]
             },
             {
+                id: 3,
+                name: "Breakthrough Cup",
+                price: 300,
+                sizes: ["Standard"],
+                variants: [
+                    { 
+                        color: "Default", 
+                        bgHex: "#ffffff",
+                        front: "https://i.imgur.com/Po2r0zV.png", 
+                        back: "https://i.imgur.com/Po2r0zV.png" 
+                    }
+                ]
+            },
+            {
+                id: 11,
+                name: "Cotton T-Shirt",
+                price: 260,
+                sizes: ["S", "M", "L", "XL", "XXL"],
+                variants: [
+                    { 
+                        color: "Black", 
+                        bgHex: "#000000",
+                        front: "https://i.imgur.com/nPTw873.jpeg", 
+                        back: "https://i.imgur.com/TeaVTrq.jpeg" 
+                    },
+                    { 
+                        color: "White", 
+                        bgHex: "#ffffff",
+                        front: "https://i.imgur.com/npc5GF0.jpeg", 
+                        back: "https://i.imgur.com/vIcAaUf.jpeg" 
+                    },
+                    { 
+                        color: "Navy Blue", 
+                        bgHex: "#1e3a8a",
+                        front: "https://i.imgur.com/If8xRyK.jpeg", 
+                        back: "https://i.imgur.com/0Z387bx.jpeg" 
+                    }
+                ]
+            },
+            {
+                id: 2,
+                name: "Branded Badge 2",
+                price: 200,
+                sizes: ["Standard"],
+                variants: [
+                    { 
+                        color: "Default", 
+                        bgHex: "#ffffff",
+                        front: "https://i.imgur.com/eQQzC8l.png", 
+                        back: "https://i.imgur.com/eQQzC8l.png" 
+                    }
+                ]
+            },
+            {
                 id: 9,
+                name: "Breakthrough Logo Cargo Smart Shirt",
+                price: 370,
+                sizes: ["S", "M", "L", "XL", "XXL"],
+                variants: [
+                    { 
+                        color: "White", 
+                        bgHex: "#ffffff",
+                        front: "https://i.imgur.com/egmNjeo.jpeg", 
+                        back: "https://i.imgur.com/Rm2EPAx.jpeg" 
+                    },
+                    { 
+                        color: "Navy Blue", 
+                        bgHex: "#1e3a8a",
+                        front: "https://i.imgur.com/brfQtJJ.jpeg", 
+                        back: "https://i.imgur.com/eyafB8R.jpeg" 
+                    },
+                    { 
+                        color: "Black", 
+                        bgHex: "#000000",
+                        front: "https://i.imgur.com/QUZExjD.jpeg", 
+                        back: "https://i.imgur.com/mBF9KyM.jpeg" 
+                    }
+                ]
+            },
+            {
+                id: 5,
+                name: "New Branded Item (L9KSgYL)",
+                price: 300,
+                sizes: ["Standard"],
+                variants: [
+                    { 
+                        color: "Default", 
+                        bgHex: "#ffffff",
+                        front: "https://i.imgur.com/L9KSgYL.png", 
+                        back: "https://i.imgur.com/L9KSgYL.png" 
+                    }
+                ]
+            },
+            {
+                id: 15,
                 name: "Branded Cap (Breakthrough + GMMI Logo)",
                 price: 100,
                 sizes: ["Standard", "Adjustable"],
                 variants: [
+                    { 
+                        color: "Navy Blue", 
+                        bgHex: "#1e3a8a",
+                        front: "https://i.imgur.com/WyH8GPL.jpeg", 
+                        back: "https://i.imgur.com/WyH8GPL.jpeg" 
+                    },
                     { 
                         color: "White", 
                         bgHex: "#ffffff",
@@ -641,20 +714,148 @@
                         bgHex: "#000000",
                         front: "https://i.imgur.com/iOFYcnJ.jpeg", 
                         back: "https://i.imgur.com/iOFYcnJ.jpeg" 
+                    }
+                ]
+            },
+            {
+                id: 4,
+                name: "GMMI Logo Cup",
+                price: 300,
+                sizes: ["Standard"],
+                variants: [
+                    { 
+                        color: "Default", 
+                        bgHex: "#ffffff",
+                        front: "https://i.imgur.com/Dlfu61U.png", 
+                        back: "https://i.imgur.com/Dlfu61U.png" 
+                    }
+                ]
+            },
+            {
+                id: 12,
+                name: "Polyester T-Shirt",
+                price: 190,
+                sizes: ["S", "M", "L", "XL", "XXL"],
+                variants: [
+                    { 
+                        color: "Navy Blue", 
+                        bgHex: "#1e3a8a",
+                        front: "https://i.imgur.com/IUcD9zu.jpeg", 
+                        back: "https://i.imgur.com/iF4izGP.jpeg" 
+                    },
+                    { 
+                        color: "Black", 
+                        bgHex: "#000000",
+                        front: "https://i.imgur.com/eCv75wX.jpeg", 
+                        back: "https://i.imgur.com/yJqNarF.jpeg" 
+                    },
+                    { 
+                        color: "White", 
+                        bgHex: "#ffffff",
+                        front: "https://i.imgur.com/Oz6aEwU.jpeg", 
+                        back: "https://i.imgur.com/LotFDge.jpeg" 
+                    }
+                ]
+            },
+            {
+                id: 6,
+                name: "New Branded Item (h8ohudL)",
+                price: 300,
+                sizes: ["Standard"],
+                variants: [
+                    { 
+                        color: "Default", 
+                        bgHex: "#ffffff",
+                        front: "https://i.imgur.com/h8ohudL.png", 
+                        back: "https://i.imgur.com/h8ohudL.png" 
+                    }
+                ]
+            },
+            {
+                id: 10,
+                name: "Cross Logo Cargo Smart Shirt",
+                price: 370,
+                sizes: ["S", "M", "L", "XL", "XXL"],
+                variants: [
+                    { 
+                        color: "Blue", 
+                        bgHex: "#2563eb",
+                        front: "https://i.imgur.com/oLFARBL.jpeg", 
+                        back: "https://i.imgur.com/eyafB8R.jpeg" 
+                    },
+                    { 
+                        color: "Black", 
+                        bgHex: "#000000",
+                        front: "https://i.imgur.com/lfmIVJm.jpeg", 
+                        back: "https://i.imgur.com/mBF9KyM.jpeg" 
+                    },
+                    { 
+                        color: "White", 
+                        bgHex: "#ffffff",
+                        front: "https://i.imgur.com/4hUCtIy.jpeg", 
+                        back: "https://i.imgur.com/Rm2EPAx.jpeg" 
+                    }
+                ]
+            },
+            {
+                id: 13,
+                name: "Breakthrough Logo Branded Cap",
+                price: 100,
+                sizes: ["Standard", "Adjustable"],
+                variants: [
+                    { 
+                        color: "Black", 
+                        bgHex: "#000000",
+                        front: "https://i.imgur.com/6G0DBiH.jpeg", 
+                        back: "https://i.imgur.com/6G0DBiH.jpeg" 
+                    },
+                    { 
+                        color: "White", 
+                        bgHex: "#ffffff",
+                        front: "https://i.imgur.com/G3LUIY0.jpeg", 
+                        back: "https://i.imgur.com/G3LUIY0.jpeg" 
                     },
                     { 
                         color: "Navy Blue", 
                         bgHex: "#1e3a8a",
-                        front: "https://i.imgur.com/WyH8GPL.jpeg", 
-                        back: "https://i.imgur.com/WyH8GPL.jpeg" 
+                        front: "https://i.imgur.com/SguDiKv.jpeg", 
+                        back: "https://i.imgur.com/SguDiKv.jpeg" 
+                    }
+                ]
+            },
+            {
+                id: 7,
+                name: "Breakthrough + Cross Logo",
+                price: 300,
+                sizes: ["S", "M", "L", "XL", "XXL"],
+                variants: [
+                    { 
+                        color: "White", 
+                        bgHex: "#ffffff",
+                        front: "https://i.imgur.com/qPf19oC.jpeg", 
+                        back: "https://i.imgur.com/1fp0KOG.jpeg" 
+                    },
+                    { 
+                        color: "Black", 
+                        bgHex: "#000000",
+                        front: "https://i.imgur.com/x7PFYT6.jpeg", 
+                        back: "https://i.imgur.com/MicTnYJ.jpeg" 
+                    },
+                    { 
+                        color: "Navy Blue", 
+                        bgHex: "#1e3a8a",
+                        front: "https://i.imgur.com/2wCQQyS.jpeg", 
+                        back: "https://i.imgur.com/m02rVJa.jpeg" 
                     }
                 ]
             }
         ];
 
-        // Store Contact Information
-        const MERCHANT_WHATSAPP = "260767881787"; 
-        const PAYMENT_MOMO_NUMBER = "0767881787";
+        // Store Contact & Payment Information
+        const MERCHANT_WHATSAPP = "260977628200"; 
+        const PAYMENT_MOMO_NUMBER = "0977628200";
+        const PAYMENT_NAME = "Sandra Kabwe";
+        const DELIVERY_FEE = 50;
 
         // Application State
         let cart = [];
@@ -668,7 +869,9 @@
             const grid = document.getElementById('productGrid');
             grid.innerHTML = products.map(product => `
                 <div class="card" onclick="openProductModal(${product.id})">
-                    <img src="${product.variants[0].front}" class="card-img" alt="${product.name}">
+                    <div class="card-img-wrapper">
+                        <img src="${product.variants[0].front}" class="card-img" alt="${product.name}">
+                    </div>
                     <div class="card-body">
                         <div class="card-title">${product.name}</div>
                         <div class="card-price">K${product.price}</div>
@@ -708,6 +911,12 @@
 
         function renderSizes() {
             const container = document.getElementById('sizeContainer');
+            const selectionSection = container.closest('.selection-section');
+            if (currentProduct.sizes.length === 1 && currentProduct.sizes[0] === "Standard") {
+                selectionSection.style.display = 'none';
+                return;
+            }
+            selectionSection.style.display = 'block';
             container.innerHTML = currentProduct.sizes.map(size => `
                 <button class="option-btn ${size === selectedSize ? 'selected' : ''}" onclick="selectSize('${size}')">${size}</button>
             `).join('');
@@ -715,7 +924,7 @@
 
         function selectColor(index) {
             currentColorIndex = index;
-            isFrontView = true; // reset to front view on color change
+            isFrontView = true;
             updateModalUI();
         }
 
@@ -733,7 +942,18 @@
             const imgSrc = isFrontView ? variant.front : variant.back;
             document.getElementById('modalImg').src = imgSrc;
             
-            document.getElementById('flipBtn').innerText = isFrontView ? "Flip to Back" : "Flip to Front";
+            const actionBtnsContainer = document.getElementById('actionBtnsContainer');
+            if (currentProduct.variants.length === 1 && currentProduct.variants[0].front === currentProduct.variants[0].back) {
+                actionBtnsContainer.style.gridTemplateColumns = '1fr';
+                actionBtnsContainer.innerHTML = `<button class="btn btn-cart" onclick="addToCart()">Add to Cart</button>`;
+            } else {
+                actionBtnsContainer.style.gridTemplateColumns = '1fr 1fr';
+                actionBtnsContainer.innerHTML = `
+                    <button class="btn btn-flip" id="flipBtn" onclick="toggleView()">${isFrontView ? "Flip to Back" : "Flip to Front"}</button>
+                    <button class="btn btn-cart" onclick="addToCart()">Add to Cart</button>
+                `;
+            }
+
             renderSizes();
             renderColors();
         }
@@ -772,19 +992,18 @@
         function renderCart() {
             const container = document.getElementById('cartItems');
             if (cart.length === 0) {
-                container.innerHTML = `<p style="text-align:center; color: var(--gray); padding: 20px 0;">Your cart is empty.</p>`;
+                container.innerHTML = `<p style="text-align:center; color: var(--gray); padding: 15px 0;">Your cart is empty.</p>`;
                 document.getElementById('cartTotal').innerText = `K0`;
                 return;
             }
 
-            let total = 0;
             container.innerHTML = cart.map((item, index) => {
-                total += item.price;
+                let detailsText = item.color !== "Default" ? `Color: ${item.color} | Size: ${item.size}` : `Size: ${item.size}`;
                 return `
                     <div class="cart-item">
                         <div>
                             <strong>${item.name}</strong><br>
-                            <small style="color:var(--gray)">Color: ${item.color} | Size: ${item.size}</small>
+                            <small style="color:var(--gray)">${detailsText}</small>
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <span>K${item.price}</span>
@@ -794,7 +1013,19 @@
                 `;
             }).join('');
 
-            document.getElementById('cartTotal').innerText = `K${total}`;
+            updateCartTotals();
+        }
+
+        function updateCartTotals() {
+            let subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+            const isDeliveryChecked = document.getElementById('deliveryCheckbox').checked;
+            let total = subtotal + (isDeliveryChecked ? DELIVERY_FEE : 0);
+            
+            let totalDisplay = `K${subtotal}`;
+            if (isDeliveryChecked) {
+                totalDisplay = `K${subtotal} + K${DELIVERY_FEE} (Delivery) = <b>K${total}</b>`;
+            }
+            document.getElementById('cartTotal').innerHTML = totalDisplay;
         }
 
         function removeFromCart(index) {
@@ -803,36 +1034,58 @@
             renderCart();
         }
 
-        // WhatsApp Checkout with Payment & Proof Instructions
+        // WhatsApp Checkout
         function checkoutToWhatsApp() {
             if (cart.length === 0) {
                 alert("Your cart is empty. Please add items before checking out.");
                 return;
             }
 
-            const totalAmount = cart.reduce((sum, item) => sum + item.price, 0);
+            const customerName = document.getElementById('customerName').value.trim();
+            const customerPhone = document.getElementById('customerPhone').value.trim();
+            const deliveryAddress = document.getElementById('deliveryAddress').value.trim();
+            const isDeliveryChecked = document.getElementById('deliveryCheckbox').checked;
+
+            if (!customerName || !customerPhone || !deliveryAddress) {
+                alert("Please fill in your name, phone number, and delivery address before placing your order.");
+                return;
+            }
+
+            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+            const deliveryFee = isDeliveryChecked ? DELIVERY_FEE : 0;
+            const totalAmount = subtotal + deliveryFee;
             const orderRef = "ORD" + Math.floor(100000 + Math.random() * 900000);
             
-            let itemDetails = cart.map(i => `- ${i.name} (${i.color}, Size: ${i.size}): K${i.price}`).join('%0A');
+            let itemDetails = cart.map(i => {
+                let spec = i.color !== "Default" ? `(${i.color}, Size: ${i.size})` : `(Size: ${i.size})`;
+                return `- ${i.name} ${spec}: K${i.price}`;
+            }).join('%0A');
+
+            let fulfillmentType = isDeliveryChecked ? `Delivery to: ${deliveryAddress} (+K50 Fee)` : `Pickup at Events Centre (${deliveryAddress})`;
 
             let message = `*--- MFUMU ONLINE SHOP ORDER ---*%0A`;
             message += `*Order Ref:* ${orderRef}%0A%0A`;
+            message += `👤 *Customer Name:* ${customerName}%0A`;
+            message += `📞 *Phone Number:* ${customerPhone}%0A`;
+            message += `🚚 *Fulfillment:* ${fulfillmentType}%0A%0A`;
             message += `*Items Ordered:*%0A${itemDetails}%0A%0A`;
+            if (isDeliveryChecked) {
+                message += `Subtotal: K${subtotal}%0A`;
+                message += `Delivery Fee: K${DELIVERY_FEE}%0A`;
+            }
             message += `*Total Amount:* K${totalAmount}%0A`;
             message += `------------------------------------------%0A`;
-            message += `📲 *PAYMENT INSTRUCTIONS:*%0A`;
-            message += `Please send *K${totalAmount}* via Mobile Money (MTN / Airtel) to:%0A`;
-            message += `👉 *${PAYMENT_MOMO_NUMBER}*%0A%0A`;
-            message += `📸 *PROOF OF PAYMENT:*%0A`;
-            message += `Once payment is completed, please screenshot your proof of payment and send it right here in this chat.%0A%0A`;
-            message += `🧾 You will receive an official receipt and notification as soon as your order is ready!`;
+            message += `💳 *PAYMENT INSTRUCTIONS:*%0A`;
+            message += `Please send *K${totalAmount}* via Mobile Money to:%0A`;
+            message += `📌 *${PAYMENT_MOMO_NUMBER}* (${PAYMENT_NAME})%0A%0A`;
+            message += `📦 *Order will be ready in 2 days!*`;
 
             // Reset cart state after order launch
             cart = [];
             updateCartBadge();
             closeModal('cartModal');
 
-            // Open WhatsApp directly with pre-filled order and instructions
+            // Open WhatsApp directly with pre-filled order
             const waUrl = `https://wa.me/${MERCHANT_WHATSAPP}?text=${message}`;
             window.open(waUrl, '_blank');
         }
